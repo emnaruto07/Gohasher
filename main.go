@@ -3,12 +3,14 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 )
 
 func main() {
 	ParseOptions()
+	beta(options.Hash)
 	fmt.Println(banner)
 }
 
@@ -45,8 +47,18 @@ func ParseOptions() *Options {
 }
 
 func alpha(hashvalue string, hashtype string) {
-	return false
+	return
 }
+
 func beta(hashvalue string, hashtype string) {
 	resp, err := http.Get("https://hashtoolkit.com/reverse-hash/?hash=" + hashvalue)
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(string(body))
 }
