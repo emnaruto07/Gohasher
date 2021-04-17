@@ -62,18 +62,18 @@ func beta(hashvalue string, hashtype string) {
 	s := re.Find(body)
 
 	fmt.Println(string(s))
+	return
 
 }
 
-var md5 []string
+var md5 []func(param string, param2 string)
 
 func hashCrack(hashvalue string) {
 
 	if len(hashvalue) == 32 {
 		println("[!] Hash Function : MD5")
 		for _, api := range md5 {
-			r := api(hashvalue, "md5")
-			fmt.Println(r)
+			api(hashvalue, "md5")
 
 		}
 
@@ -87,7 +87,7 @@ func hashOnly(hashvalue string) {
 
 func main() {
 
-	md5 = append(md5, "beta")
+	md5 = append(md5, beta)
 
 	fmt.Println(banner)
 	options := ParseOptions()
