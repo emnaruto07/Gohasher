@@ -71,30 +71,24 @@ func beta(hashvalue string, hashtype string) {
 func main() {
 
 	fmt.Println(banner)
+	options := ParseOptions()
 
-	hash := flag.String("hash", "", "Contains the hash values")
-	hashfile := flag.String("l", "", "This contains file containing hashes")
-	threads := flag.Int("c", 20, " Contains the thread value")
-	version := flag.Bool("v", false, "Show current program version")
-	flag.Parse()
+	//hash := flag.String("hash", "", "Contains the hash values")
+	//hashfile := flag.String("l", "", "This contains file containing hashes")
+	//threads := flag.Int("c", 20, " Contains the thread value")
+	//version := flag.Bool("v", false, "Show current program version")
+	//flag.Parse()
 
-	if *version {
-		fmt.Printf("The current version of program is :%v", Version)
-		os.Exit(0)
-	}
+	//if *version {
+	//	fmt.Printf("The current version of program is :%v", Version)
+	//	os.Exit(0)
+	//}
 
-	if *hash == "" && *hashfile == "" {
+	if options.Hash == "" && options.File == "" {
 		fmt.Println("hash string or hash file must be provided")
 		flag.Usage()
 		return
 	}
-
-	var options Options
-
-	options.Concurrency = *threads
-
-	options.Hash = *hash
-	options.List = *hashfile
 
 	beta(options.Hash, "")
 
