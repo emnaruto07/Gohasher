@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"regexp"
@@ -21,7 +22,7 @@ _  / __ _  __ \_  __ \  __  /_  ___/_  __ \  _ \_  ___/
 
 type Options struct {
 	Hash        string
-	List        string
+	List        []string
 	Concurrency int
 	Version     bool
 }
@@ -29,6 +30,25 @@ type Options struct {
 var md5, sha1, sha256, sha384, sha512 []func(param string, param2 string) string
 
 var result []string
+
+func parseFile(filename string) ([]string, error) {
+	d, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return nil, err
+	}
+
+	rows := strings.Split(string(d), "\n")
+	i := 0
+	for i < len(rows) {
+		rows[i] = strings.TrimSpace(rows[i])
+		if rows[i] == "" {
+			rows = append(rows[:i], rows[i+1:]...)
+			continue
+		}
+		i++
+	}
+	return rows, nil
+}
 
 func ParseOptions() *Options {
 	options := &Options{}
@@ -147,7 +167,7 @@ func hashCrack(hashvalue string) []string {
 		}
 
 	} else {
-		println("[!!] This hash ype is not supported")
+		println("[!!] This hash type is not supported")
 		os.Exit(0)
 	}
 
@@ -171,11 +191,18 @@ func main() {
 	fmt.Println(banner)
 	options := ParseOptions()
 
-	if options.Hash == "" && options.List == "" {
+	if options.Hash == "" && *options.List == "" {
 		fmt.Println("hash string or hash file must be provided")
 		flag.Usage()
 		return
 	}
+
+	var err error
+	options.List, err = parseFile(*options.List)
+	if err != nil {
+		println("could not parse hash file:", err)
+	}
+
 	hashOnly(options.Hash)
 
 }
