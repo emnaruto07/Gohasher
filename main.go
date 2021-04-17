@@ -58,11 +58,7 @@ func beta(hashvalue string, hashtype string) {
 	}
 	re := regexp.MustCompile(`text=.*?"`)
 
-	// re := regexp.MustCompile(`text=.*?"`)
-
-	// s := re.FindString(string(body))
-
-	// decodedValue, err := url.QueryUnescape(s)
+	//decodedValue, err := url.QueryUnescape(s)
 	s := re.Find(body)
 
 	fmt.Println(string(s))
@@ -73,17 +69,6 @@ func main() {
 
 	fmt.Println(banner)
 	options := ParseOptions()
-
-	//hash := flag.String("hash", "", "Contains the hash values")
-	//hashfile := flag.String("l", "", "This contains file containing hashes")
-	//threads := flag.Int("c", 20, " Contains the thread value")
-	//version := flag.Bool("v", false, "Show current program version")
-	//flag.Parse()
-
-	//if *version {
-	//	fmt.Printf("The current version of program is :%v", Version)
-	//	os.Exit(0)
-	//}
 
 	if options.Hash == "" && options.List == "" {
 		fmt.Println("hash string or hash file must be provided")
