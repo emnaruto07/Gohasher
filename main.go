@@ -5,14 +5,10 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
+	"regexp"
 )
-
-func main() {
-	ParseOptions()
-	beta(options.Hash)
-	fmt.Println(banner)
-}
 
 const Version = `v1.0`
 
@@ -51,7 +47,8 @@ func alpha(hashvalue string, hashtype string) {
 }
 
 func beta(hashvalue string, hashtype string) {
-	resp, err := http.Get("https://hashtoolkit.com/reverse-hash/?hash=" + hashvalue)
+
+	resp, err := http.Get("https://hashtoolkit.com/decrypt-hash/?hash=" + hashvalue)
 	if err != nil {
 		panic(err)
 	}
@@ -60,5 +57,45 @@ func beta(hashvalue string, hashtype string) {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(string(body))
+
+	re := regexp.MustCompile(`text=.*?"`)
+
+	s := re.FindString(string(body))
+
+	decodedValue, err := url.QueryUnescape(s)
+
+	fmt.Println(decodedValue)
+
+}
+
+func main() {
+
+	fmt.Println(banner)
+
+	hash := flag.String("hash", "", "Contains the hash values")
+	hashfile := flag.String("l", "", "This contains file containing hashes")
+	threads := flag.Int("c", 20, " Contains the thread value")
+	version := flag.Bool("v", false, "Show current program version")
+	flag.Parse()
+
+	if *version {
+		fmt.Printf("The current version of program is :%v", Version)
+		os.Exit(0)
+	}
+
+	if *hash == "" && *hashfile == "" {
+		fmt.Println("hash string or hash file must be provided")
+		flag.Usage()
+		return
+	}
+
+	var options Options
+
+	options.Concurrency = *threads
+
+	options.Hash = *hash
+	options.List = *hashfile
+
+	beta(options.Hash, "")
+
 }
