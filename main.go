@@ -6,7 +6,6 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"reflect"
 	"regexp"
 )
 
@@ -25,7 +24,7 @@ type Options struct {
 	Version     bool
 }
 
-var md5, sha1, sha256 []string
+var md5 []func(param string, param2 string) string
 
 func ParseOptions() *Options {
 	options := &Options{}
@@ -48,7 +47,7 @@ func alpha(hashvalue string) {
 	return
 }
 
-func beta(hashvalue string, hashtype string) {
+func Beta(hashvalue string, hashtype string) string {
 
 	resp, err := http.Get("https://hashtoolkit.com/decrypt-hash/?hash=" + hashvalue)
 	if err != nil {
@@ -63,21 +62,40 @@ func beta(hashvalue string, hashtype string) {
 
 	//decodedValue, err := url.QueryUnescape(s)
 	s := re.Find(body)
+	r := string(s)
 
-	fmt.Println(string(s))
+	return r
+
+}
+
+func Theta(hashvalue string, hashtype string) string {
+
+	resp, err := http.Get("https://hashtoolkit.com/decrypt-hash/?hash=" + hashvalue)
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		panic(err)
+	}
+	re := regexp.MustCompile(`text=.*?"`)
+
+	//decodedValue, err := url.QueryUnescape(s)
+	s := re.Find(body)
+	r := string(s)
+
+	return r
 
 }
 
 func hashCrack(hashvalue string) {
-	h := hashvalue
 
 	if len(hashvalue) == 32 {
 		println("[!] Hash Function : MD5")
 		for _, api := range md5 {
-			println(api)
-
-			r := reflect.ValueOf(h).MethodByName(api)
-
+			r := api(hashvalue, "md5")
+			println(r)
 		}
 
 	}
@@ -90,7 +108,7 @@ func hashOnly(hashvalue string) {
 
 func main() {
 
-	md5 = append(md5, "beta")
+	md5 = append(md5, Beta, Theta)
 
 	fmt.Println(banner)
 	options := ParseOptions()
