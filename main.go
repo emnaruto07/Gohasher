@@ -6,7 +6,6 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"reflect"
 	"regexp"
 )
 
@@ -25,8 +24,6 @@ type Options struct {
 	Version     bool
 }
 
-var md5, sha1, sha256 []string
-
 func ParseOptions() *Options {
 	options := &Options{}
 
@@ -44,7 +41,7 @@ func ParseOptions() *Options {
 	return options
 }
 
-func alpha(hashvalue string) {
+func alpha(hashvalue string, hashtype string) {
 	return
 }
 
@@ -68,15 +65,15 @@ func beta(hashvalue string, hashtype string) {
 
 }
 
+var md5 []string
+
 func hashCrack(hashvalue string) {
-	h := hashvalue
 
 	if len(hashvalue) == 32 {
 		println("[!] Hash Function : MD5")
 		for _, api := range md5 {
-			println(api)
-
-			r := reflect.ValueOf(h).MethodByName(api)
+			r := api(hashvalue, "md5")
+			fmt.Println(r)
 
 		}
 
