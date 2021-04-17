@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"net/url"
 	"os"
 	"regexp"
 )
@@ -57,14 +56,16 @@ func beta(hashvalue string, hashtype string) {
 	if err != nil {
 		panic(err)
 	}
-
 	re := regexp.MustCompile(`text=.*?"`)
 
-	s := re.FindString(string(body))
+	// re := regexp.MustCompile(`text=.*?"`)
 
-	decodedValue, err := url.QueryUnescape(s)
+	// s := re.FindString(string(body))
 
-	fmt.Println(decodedValue)
+	// decodedValue, err := url.QueryUnescape(s)
+	s := re.Find(body)
+
+	fmt.Println(string(s))
 
 }
 
@@ -84,7 +85,7 @@ func main() {
 	//	os.Exit(0)
 	//}
 
-	if options.Hash == "" && options.File == "" {
+	if options.Hash == "" && options.List == "" {
 		fmt.Println("hash string or hash file must be provided")
 		flag.Usage()
 		return
