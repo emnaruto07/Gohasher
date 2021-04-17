@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"reflect"
 	"regexp"
 )
 
@@ -23,6 +24,8 @@ type Options struct {
 	Concurrency int
 	Version     bool
 }
+
+var md5, sha1, sha256 []string
 
 func ParseOptions() *Options {
 	options := &Options{}
@@ -45,7 +48,7 @@ func alpha(hashvalue string) {
 	return
 }
 
-func beta(hashvalue string) {
+func beta(hashvalue string, hashtype string) {
 
 	resp, err := http.Get("https://hashtoolkit.com/decrypt-hash/?hash=" + hashvalue)
 	if err != nil {
@@ -65,7 +68,29 @@ func beta(hashvalue string) {
 
 }
 
+func hashCrack(hashvalue string) {
+	h := hashvalue
+
+	if len(hashvalue) == 32 {
+		println("[!] Hash Function : MD5")
+		for _, api := range md5 {
+			println(api)
+
+			r := reflect.ValueOf(h).MethodByName(api)
+
+		}
+
+	}
+
+}
+
+func hashOnly(hashvalue string) {
+
+}
+
 func main() {
+
+	md5 = append(md5, "beta")
 
 	fmt.Println(banner)
 	options := ParseOptions()
@@ -75,7 +100,6 @@ func main() {
 		flag.Usage()
 		return
 	}
-
-	beta(options.Hash)
+	hashCrack(options.Hash)
 
 }
