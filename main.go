@@ -41,11 +41,11 @@ func ParseOptions() *Options {
 	return options
 }
 
-func alpha(hashvalue string, hashtype string) {
+func alpha(hashvalue string) {
 	return
 }
 
-func beta(hashvalue string, hashtype string) {
+func beta(hashvalue string) {
 
 	resp, err := http.Get("https://hashtoolkit.com/decrypt-hash/?hash=" + hashvalue)
 	if err != nil {
