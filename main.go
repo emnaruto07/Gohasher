@@ -17,9 +17,6 @@ __  ____/________  /_______ __________  /______________
 _  / __ _  __ \_  __ \  __  /_  ___/_  __ \  _ \_  ___/
 / /_/ / / /_/ /  / / / /_/ /_(__  )_  / / /  __/  /    
 \____/  \____//_/ /_/\__,_/ /____/ /_/ /_/\___//_/      
-                                                   
-
-
 `
 
 type Options struct {
@@ -159,7 +156,7 @@ func hashCrack(hashvalue string) []string {
 
 func hashOnly(hashvalue string) {
 	res := hashCrack(hashvalue)
-	println("Cracked hash  of " + hashvalue + " value  is : " + res[1])
+	println("Cracked hash of " + hashvalue + " value is: " + res[1])
 
 }
 
