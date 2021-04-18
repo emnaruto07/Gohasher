@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 	"regexp"
 	"strings"
@@ -50,10 +51,6 @@ func ParseOptions() *Options {
 	return options
 }
 
-func alpha(hashvalue string) {
-	return
-}
-
 func Beta(hashvalue string, hashtype string) string {
 
 	resp, err := http.Get("https://hashtoolkit.com/decrypt-hash/?hash=" + hashvalue)
@@ -67,7 +64,6 @@ func Beta(hashvalue string, hashtype string) string {
 	}
 	re := regexp.MustCompile(`text=.*?"`)
 
-	//decodedValue, err := url.QueryUnescape(s)
 	s := re.Find(body)
 	r := string(s)
 
@@ -159,8 +155,11 @@ func hashCrack(hashvalue string) []string {
 
 func hashOnly(hashvalue string) {
 	res := hashCrack(hashvalue)
-	println("Cracked hash of " + hashvalue + " value is: " + res[1])
-
+	decodedValue, err := url.QueryUnescape(res[0])
+	if err != nil {
+		println(err)
+	}
+	println("Cracked hash of " + hashvalue + " value is: " + decodedValue)
 }
 
 func main() {
