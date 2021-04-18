@@ -12,7 +12,7 @@ import (
 	"strings"
 )
 
-var White = Color("\033[1;37m%s\033[0m")
+var Teal = Color("\033[1;36m%s\033[0m")
 
 func Color(colorString string) func(...interface{}) string {
 	sprint := func(args ...interface{}) string {
@@ -52,7 +52,7 @@ func main() {
 	sha384 = append(sha384, Charlie, Bravo)
 	sha512 = append(sha512, Charlie, Bravo)
 
-	fmt.Println(White(banner))
+	fmt.Println(Teal(banner))
 	options := ParseOptions()
 
 	if options.Hash == "" && options.List == "" {
