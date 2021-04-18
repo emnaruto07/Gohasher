@@ -228,6 +228,6 @@ func hashOnly(hashvalue string) {
 		if err != nil {
 			println(err)
 		}
-		println("Cracked hash of " + k + " value: " + decodedValue)
+		println("Hash:" + k + " value: " + decodedValue)
 	}
 }
