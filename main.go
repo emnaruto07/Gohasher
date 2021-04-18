@@ -4,11 +4,13 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
 	"regexp"
 	"strings"
+	"sync"
 )
 
 const Version = `v1.0`
@@ -27,11 +29,28 @@ type Options struct {
 	Version     bool
 }
 
+var wg sync.WaitGroup
+
 var md5, sha1, sha256, sha384, sha512 []func(param string, param2 string) string
 
-var result []string
+var result map[string]string
 
-func ParseFile(filename string) {
+func ParseFile(filename string) ([]string, error) {
+	d, err := ioutil.ReadFile(filename)
+	if err != nil {
+		panic(err)
+	}
+	rows := strings.Split(string(d), "\n")
+	i := 0
+	for i < len(rows) {
+		rows[i] = strings.TrimSpace(rows[i])
+		if rows[i] == "" {
+			rows = append(rows[:i], rows[i+1:]...)
+		}
+		i++
+	}
+	return rows, nil
+
 }
 
 func ParseOptions() *Options {
@@ -97,16 +116,17 @@ func Theta(hashvalue string, hashtype string) string {
 
 }
 
-func hashCrack(hashvalue string) []string {
+func hashCrack(hashvalue string) map[string]string {
 
+	result = make(map[string]string)
 	if len(hashvalue) == 32 {
 		println("[!] Hash Function : MD5\n")
 		for _, api := range md5 {
 			r := api(hashvalue, "md5")
 			if r != "" {
-				result = append(result, r)
+				result[hashvalue] = r
 			} else {
-				result = append(result, "No hash found.")
+				result[hashvalue] = "No hash found."
 			}
 		}
 
@@ -115,9 +135,9 @@ func hashCrack(hashvalue string) []string {
 		for _, api := range sha1 {
 			r := api(hashvalue, "sha1")
 			if r != "" {
-				result = append(result, r)
+				result[hashvalue] = r
 			} else {
-				result = append(result, "No hash found.")
+				result[hashvalue] = "No hash found."
 			}
 
 		}
@@ -127,9 +147,9 @@ func hashCrack(hashvalue string) []string {
 		for _, api := range sha256 {
 			r := api(hashvalue, "sha256")
 			if r != "" {
-				result = append(result, r)
+				result[hashvalue] = r
 			} else {
-				result = append(result, "No hash found.")
+				result[hashvalue] = "No hash found."
 			}
 		}
 
@@ -138,9 +158,9 @@ func hashCrack(hashvalue string) []string {
 		for _, api := range sha384 {
 			r := api(hashvalue, "sha384")
 			if r != "" {
-				result = append(result, r)
+				result[hashvalue] = r
 			} else {
-				result = append(result, "No hash found.")
+				result[hashvalue] = "No hash found."
 			}
 		}
 
@@ -149,10 +169,10 @@ func hashCrack(hashvalue string) []string {
 		for _, api := range sha512 {
 			r := api(hashvalue, "sha512")
 			if r != "" {
-				result = append(result, r)
+				result[hashvalue] = r
 
 			} else {
-				result = append(result, "No hash found.")
+				result[hashvalue] = "No hash found."
 			}
 		}
 
@@ -165,13 +185,25 @@ func hashCrack(hashvalue string) []string {
 }
 
 func hashOnly(hashvalue string) {
+	defer wg.Done()
 	res := hashCrack(hashvalue)
-	decodedValue, err := url.QueryUnescape(res[0])
-	if err != nil {
-		println(err)
+	for k, v := range res {
+		decodedValue, err := url.QueryUnescape(v)
+		if err != nil {
+			println(err)
+		}
+		println("Cracked hash of " + k + " value: " + decodedValue)
 	}
-	println("Cracked hash of " + hashvalue + " value: " + decodedValue)
 }
+
+// for _, r := range res {
+// 	decodedValue, err := url.QueryUnescape(r)
+// 	if err != nil {
+// 		println(err)
+// 	}
+
+// 	println("Cracked hash of " + hashvalue + " value: " + decodedValue)
+// }
 
 func main() {
 
@@ -190,6 +222,15 @@ func main() {
 		return
 	}
 
-	hashOnly(options.Hash)
+	//hashOnly(options.Hash)
+	file, err := ParseFile(options.List)
+	if err != nil {
+		panic(err)
+	}
+	for _, f := range file {
+		wg.Add(1)
+		go hashOnly(f)
+	}
+	wg.Wait()
 
 }
