@@ -27,7 +27,7 @@ Usage of ./Gohasher:
 
 ```
 # License
-Gohasher is made with :heart:&nbsp; in India :india: .
+Gohasher is made with :heart:&nbsp; in India :india: by [@emnaruto07](https://twitter.com/emnaruto07) & [@s0u1z](https://twitter.com/Shreyasbhat4).
 
 # Credits
-Project is inspired by https://github.com/s0md3v/Hash-Buster ❤️
+Project is inspired by [@s0md3v/Hash-Buster](https://github.com/s0md3v/Hash-Buster) ❤️
