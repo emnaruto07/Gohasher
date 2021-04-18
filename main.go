@@ -20,7 +20,7 @@ _  / __ _  __ \_  __ \  __  /_  ___/_  __ \  _ \_  ___/
 / /_/ / / /_/ /  / / / /_/ /_(__  )_  / / /  __/  /    
 \____/  \____//_/ /_/\__,_/ /____/ /_/ /_/\___//_/      
 
-             created by @emnaruto07 & @s0u1z
+             created by @emnaruto07 & @s0u1z 
 `
 
 type Options struct {
@@ -46,7 +46,7 @@ func main() {
 	options := ParseOptions()
 
 	if options.Hash == "" && options.List == "" {
-		fmt.Println("hash string or hash file must be provided")
+		fmt.Println("HASH STRING OR HASH FILE MUST BE PROVIDED\t")
 		flag.Usage()
 		return
 	}
