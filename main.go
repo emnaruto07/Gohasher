@@ -15,7 +15,11 @@ const banner = `_________     ______               ______
 __  ____/________  /_______ __________  /______________
 _  / __ _  __ \_  __ \  __  /_  ___/_  __ \  _ \_  ___/
 / /_/ / / /_/ /  / / / /_/ /_(__  )_  / / /  __/  /    
-\____/  \____//_/ /_/\__,_/ /____/ /_/ /_/\___//_/`
+\____/  \____//_/ /_/\__,_/ /____/ /_/ /_/\___//_/      
+                                                   
+
+
+`
 
 type Options struct {
 	Hash        string
@@ -24,7 +28,9 @@ type Options struct {
 	Version     bool
 }
 
-var md5 []func(param string, param2 string) string
+var md5, sha1, sha256, sha384, sha512 []func(param string, param2 string) string
+
+var result []string
 
 func ParseOptions() *Options {
 	options := &Options{}
@@ -70,45 +76,97 @@ func Beta(hashvalue string, hashtype string) string {
 
 func Theta(hashvalue string, hashtype string) string {
 
-	resp, err := http.Get("https://hashtoolkit.com/decrypt-hash/?hash=" + hashvalue)
+	path := fmt.Sprintf("https://md5decrypt.net/Api/api.php?hash=%s&hash_type=%s&email=deanna_abshire@proxymail.eu&code=1152464b80a61728", hashvalue, hashtype)
+
+	resp, err := http.Get(path)
 	if err != nil {
 		panic(err)
 	}
 	defer resp.Body.Close()
 	body, err := io.ReadAll(resp.Body)
+
 	if err != nil {
 		panic(err)
 	}
-	re := regexp.MustCompile(`text=.*?"`)
 
-	//decodedValue, err := url.QueryUnescape(s)
-	s := re.Find(body)
-	r := string(s)
-
-	return r
+	return string(body)
 
 }
 
-func hashCrack(hashvalue string) {
+func hashCrack(hashvalue string) []string {
 
 	if len(hashvalue) == 32 {
-		println("[!] Hash Function : MD5")
+		println("[!] Hash Function : MD5\n")
 		for _, api := range md5 {
 			r := api(hashvalue, "md5")
-			println(r)
+			if r != "" {
+				result = append(result, r)
+
+			}
 		}
 
+	} else if len(hashvalue) == 40 {
+		println("[!] Hash Function : SHA1\n")
+		for _, api := range sha1 {
+			r := api(hashvalue, "sha1")
+			if r != "" {
+				result = append(result, r)
+
+			}
+		}
+
+	} else if len(hashvalue) == 64 {
+		println("[!] Hash Function : SHA-256\n")
+		for _, api := range sha1 {
+			r := api(hashvalue, "sha256")
+			if r != "" {
+				result = append(result, r)
+
+			}
+		}
+
+	} else if len(hashvalue) == 96 {
+		println("[!] Hash Function : SHA-384\n")
+		for _, api := range sha1 {
+			r := api(hashvalue, "sha384")
+			if r != "" {
+				result = append(result, r)
+
+			}
+		}
+
+	} else if len(hashvalue) == 128 {
+		println("[!] Hash Function : SHA-512\n")
+		for _, api := range sha1 {
+			r := api(hashvalue, "sha512")
+			if r != "" {
+				result = append(result, r)
+
+			}
+		}
+
+	} else {
+		println("[!!] This hash ype is not supported")
+		os.Exit(0)
 	}
 
+	return result
 }
 
 func hashOnly(hashvalue string) {
-
+	res := hashCrack(hashvalue)
+	for _, val := range res {
+		println("Cracked hash  of " + hashvalue + " value  is : " + val)
+	}
 }
 
 func main() {
 
 	md5 = append(md5, Beta, Theta)
+	sha1 = append(sha1, Beta, Theta)
+	sha256 = append(sha256, Beta, Theta)
+	sha384 = append(sha384, Beta, Theta)
+	sha512 = append(sha512, Beta, Theta)
 
 	fmt.Println(banner)
 	options := ParseOptions()
@@ -118,6 +176,6 @@ func main() {
 		flag.Usage()
 		return
 	}
-	hashCrack(options.Hash)
+	hashOnly(options.Hash)
 
 }
