@@ -105,7 +105,8 @@ func hashCrack(hashvalue string) []string {
 			r := api(hashvalue, "md5")
 			if r != "" {
 				result = append(result, r)
-
+			} else {
+				result = append(result, "No hash found.")
 			}
 		}
 
@@ -115,8 +116,10 @@ func hashCrack(hashvalue string) []string {
 			r := api(hashvalue, "sha1")
 			if r != "" {
 				result = append(result, r)
-
+			} else {
+				result = append(result, "No hash found.")
 			}
+
 		}
 
 	} else if len(hashvalue) == 64 {
@@ -125,9 +128,8 @@ func hashCrack(hashvalue string) []string {
 			r := api(hashvalue, "sha256")
 			if r != "" {
 				result = append(result, r)
-
 			} else {
-				result = append(result, "Hash not found in the database.")
+				result = append(result, "No hash found.")
 			}
 		}
 
@@ -137,7 +139,8 @@ func hashCrack(hashvalue string) []string {
 			r := api(hashvalue, "sha384")
 			if r != "" {
 				result = append(result, r)
-
+			} else {
+				result = append(result, "No hash found.")
 			}
 		}
 
@@ -148,6 +151,8 @@ func hashCrack(hashvalue string) []string {
 			if r != "" {
 				result = append(result, r)
 
+			} else {
+				result = append(result, "No hash found.")
 			}
 		}
 
@@ -165,7 +170,7 @@ func hashOnly(hashvalue string) {
 	if err != nil {
 		println(err)
 	}
-	println("Cracked hash of " + hashvalue + " value is: " + decodedValue)
+	println("Cracked hash of " + hashvalue + " value: " + decodedValue)
 }
 
 func main() {
