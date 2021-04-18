@@ -39,5 +39,5 @@ Gohasher is made with :heart:&nbsp; in India :india: by [@emnaruto07](https://tw
 # Credits
 Project is inspired by [@s0md3v/Hash-Buster](https://github.com/s0md3v/Hash-Buster) ❤️
 
-# TO-DO
+### TODO
 - [ ] Concurrency
