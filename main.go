@@ -35,6 +35,35 @@ var md5, sha1, sha256, sha384, sha512 []func(param string, param2 string) string
 
 var result map[string]string
 
+func main() {
+
+	md5 = append(md5, Beta, Theta)
+	sha1 = append(sha1, Beta, Theta)
+	sha256 = append(sha256, Beta, Theta)
+	sha384 = append(sha384, Beta, Theta)
+	sha512 = append(sha512, Beta, Theta)
+
+	fmt.Println(banner)
+	options := ParseOptions()
+
+	if options.Hash == "" && options.List == "" {
+		fmt.Println("hash string or hash file must be provided")
+		flag.Usage()
+		return
+	}
+
+	//hashOnly(options.Hash)
+	file, err := ParseFile(options.List)
+	if err != nil {
+		panic(err)
+	}
+	for _, f := range file {
+		wg.Add(1)
+		go hashOnly(f)
+	}
+	wg.Wait()
+
+}
 func ParseFile(filename string) ([]string, error) {
 	d, err := ioutil.ReadFile(filename)
 	if err != nil {
@@ -204,33 +233,3 @@ func hashOnly(hashvalue string) {
 
 // 	println("Cracked hash of " + hashvalue + " value: " + decodedValue)
 // }
-
-func main() {
-
-	md5 = append(md5, Beta, Theta)
-	sha1 = append(sha1, Beta, Theta)
-	sha256 = append(sha256, Beta, Theta)
-	sha384 = append(sha384, Beta, Theta)
-	sha512 = append(sha512, Beta, Theta)
-
-	fmt.Println(banner)
-	options := ParseOptions()
-
-	if options.Hash == "" && options.List == "" {
-		fmt.Println("hash string or hash file must be provided")
-		flag.Usage()
-		return
-	}
-
-	//hashOnly(options.Hash)
-	file, err := ParseFile(options.List)
-	if err != nil {
-		panic(err)
-	}
-	for _, f := range file {
-		wg.Add(1)
-		go hashOnly(f)
-	}
-	wg.Wait()
-
-}
