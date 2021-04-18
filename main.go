@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"regexp"
+	"strings"
 )
 
 const Version = `v1.0`
@@ -70,7 +71,10 @@ func Beta(hashvalue string, hashtype string) string {
 	s := re.Find(body)
 	r := string(s)
 
-	return r
+	res := strings.Split(r, "=")
+	ress := res[1]
+
+	return ress[:len(ress)-1]
 
 }
 
@@ -155,9 +159,8 @@ func hashCrack(hashvalue string) []string {
 
 func hashOnly(hashvalue string) {
 	res := hashCrack(hashvalue)
-	for _, val := range res {
-		println("Cracked hash  of " + hashvalue + " value  is : " + val)
-	}
+	println("Cracked hash  of " + hashvalue + " value  is : " + res[1])
+
 }
 
 func main() {
