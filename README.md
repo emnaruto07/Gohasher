@@ -1,6 +1,13 @@
 # Gohasher
 A command-line tool to crack the hashes using the internet in seconds.
 
+# Features
+
+<h1 align="left">
+  <img src="/images/img.png" alt="Gohasher" width="600px"></a>
+  <br>
+</h1>
+
 # Installation Instruction
 ### From Command Line
 ```bash
