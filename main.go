@@ -21,7 +21,7 @@ _  / __ _  __ \_  __ \  __  /_  ___/_  __ \  _ \_  ___/
 
 type Options struct {
 	Hash        string
-	List        []string
+	List        string
 	Concurrency int
 	Version     bool
 }
@@ -121,7 +121,7 @@ func hashCrack(hashvalue string) []string {
 
 	} else if len(hashvalue) == 64 {
 		println("[!] Hash Function : SHA-256\n")
-		for _, api := range sha1 {
+		for _, api := range sha256 {
 			r := api(hashvalue, "sha256")
 			if r != "" {
 				result = append(result, r)
@@ -131,7 +131,7 @@ func hashCrack(hashvalue string) []string {
 
 	} else if len(hashvalue) == 96 {
 		println("[!] Hash Function : SHA-384\n")
-		for _, api := range sha1 {
+		for _, api := range sha384 {
 			r := api(hashvalue, "sha384")
 			if r != "" {
 				result = append(result, r)
@@ -141,7 +141,7 @@ func hashCrack(hashvalue string) []string {
 
 	} else if len(hashvalue) == 128 {
 		println("[!] Hash Function : SHA-512\n")
-		for _, api := range sha1 {
+		for _, api := range sha512 {
 			r := api(hashvalue, "sha512")
 			if r != "" {
 				result = append(result, r)
@@ -174,7 +174,7 @@ func main() {
 	fmt.Println(banner)
 	options := ParseOptions()
 
-	if options.Hash == "" && *options.List == "" {
+	if options.Hash == "" && options.List == "" {
 		fmt.Println("hash string or hash file must be provided")
 		flag.Usage()
 		return
