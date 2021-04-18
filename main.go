@@ -66,12 +66,16 @@ func Beta(hashvalue string, hashtype string) string {
 
 	s := re.Find(body)
 	r := string(s)
+	if r != "" {
 
-	res := strings.Split(r, "=")
-	ress := res[1]
+		res := strings.Split(r, "=")
+		ress := res[1]
 
-	return ress[:len(ress)-1]
+		return ress[:len(ress)-1]
 
+	} else {
+		return r
+	}
 }
 
 func Theta(hashvalue string, hashtype string) string {
@@ -122,6 +126,8 @@ func hashCrack(hashvalue string) []string {
 			if r != "" {
 				result = append(result, r)
 
+			} else {
+				result = append(result, "Hash not found in the database.")
 			}
 		}
 
