@@ -164,7 +164,7 @@ func hashCrack(hashvalue string) map[string]string {
 
 	result = make(map[string]string)
 	if len(hashvalue) == 32 {
-		println("[!] Hash Function : MD5\n")
+		fmt.Println("[!] Hash Function: MD5")
 		for _, api := range md5 {
 			r := api(hashvalue, "md5")
 			if r != "" {
@@ -175,7 +175,7 @@ func hashCrack(hashvalue string) map[string]string {
 		}
 
 	} else if len(hashvalue) == 40 {
-		println("[!] Hash Function : SHA1\n")
+		fmt.Println("[!] Hash Function: SHA1")
 		for _, api := range sha1 {
 			r := api(hashvalue, "sha1")
 			if r != "" {
@@ -187,7 +187,7 @@ func hashCrack(hashvalue string) map[string]string {
 		}
 
 	} else if len(hashvalue) == 64 {
-		println("[!] Hash Function : SHA-256\n")
+		fmt.Println("[!] Hash Function: SHA-256")
 		for _, api := range sha256 {
 			r := api(hashvalue, "sha256")
 			if r != "" {
@@ -198,7 +198,7 @@ func hashCrack(hashvalue string) map[string]string {
 		}
 
 	} else if len(hashvalue) == 96 {
-		println("[!] Hash Function : SHA-384\n")
+		fmt.Println("[!] Hash Function: SHA-384")
 		for _, api := range sha384 {
 			r := api(hashvalue, "sha384")
 			if r != "" {
@@ -209,7 +209,7 @@ func hashCrack(hashvalue string) map[string]string {
 		}
 
 	} else if len(hashvalue) == 128 {
-		println("[!] Hash Function : SHA-512\n")
+		fmt.Println("[!] Hash Function: SHA-512")
 		for _, api := range sha512 {
 			r := api(hashvalue, "sha512")
 			if r != "" {
@@ -221,7 +221,7 @@ func hashCrack(hashvalue string) map[string]string {
 		}
 
 	} else {
-		println("[!!] This hash type is not supported\n")
+		fmt.Println("[!!] This hash type is not supported")
 		os.Exit(0)
 	}
 
@@ -234,8 +234,8 @@ func hashOnly(hashvalue string) {
 	for k, v := range res {
 		decodedValue, err := url.QueryUnescape(v)
 		if err != nil {
-			println(err)
+			fmt.Println(err)
 		}
-		println("Hash:" + k + " value: " + decodedValue)
+		fmt.Println("Hash:" + k + " value: " + decodedValue)
 	}
 }
