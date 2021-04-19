@@ -52,16 +52,24 @@ func main() {
 		return
 	}
 
-	//hashOnly(options.Hash)
-	file, err := ParseFile(options.List)
-	if err != nil {
-		panic(err)
+	if options.Hash != "" {
+
+		hashOnly(options.Hash)
+
+	} else if options.List != "" {
+
+		file, err := ParseFile(options.List)
+		if err != nil {
+			panic(err)
+		}
+		for _, f := range file {
+
+			hashOnly(f)
+		}
+
 	}
-	for _, f := range file {
-		wg.Add(1)
-		go hashOnly(f)
-	}
-	wg.Wait()
+
+	//
 
 }
 func ParseFile(filename string) ([]string, error) {
@@ -155,7 +163,7 @@ func hashCrack(hashvalue string) map[string]string {
 			if r != "" {
 				result[hashvalue] = r
 			} else {
-				result[hashvalue] = "No hash found."
+				result[hashvalue] = "No hash found.\n"
 			}
 		}
 
@@ -166,7 +174,7 @@ func hashCrack(hashvalue string) map[string]string {
 			if r != "" {
 				result[hashvalue] = r
 			} else {
-				result[hashvalue] = "No hash found."
+				result[hashvalue] = "No hash found.\n"
 			}
 
 		}
@@ -178,7 +186,7 @@ func hashCrack(hashvalue string) map[string]string {
 			if r != "" {
 				result[hashvalue] = r
 			} else {
-				result[hashvalue] = "No hash found."
+				result[hashvalue] = "No hash found.\n"
 			}
 		}
 
@@ -189,7 +197,7 @@ func hashCrack(hashvalue string) map[string]string {
 			if r != "" {
 				result[hashvalue] = r
 			} else {
-				result[hashvalue] = "No hash found."
+				result[hashvalue] = "No hash found.\n"
 			}
 		}
 
@@ -201,12 +209,12 @@ func hashCrack(hashvalue string) map[string]string {
 				result[hashvalue] = r
 
 			} else {
-				result[hashvalue] = "No hash found."
+				result[hashvalue] = "No hash found.\n"
 			}
 		}
 
 	} else {
-		println("[!!] This hash type is not supported")
+		println("[!!] This hash type is not supported\n")
 		os.Exit(0)
 	}
 
@@ -214,7 +222,7 @@ func hashCrack(hashvalue string) map[string]string {
 }
 
 func hashOnly(hashvalue string) {
-	defer wg.Done()
+
 	res := hashCrack(hashvalue)
 	for k, v := range res {
 		decodedValue, err := url.QueryUnescape(v)
