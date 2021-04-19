@@ -10,7 +10,6 @@ import (
 	"os"
 	"regexp"
 	"strings"
-	"sync"
 )
 
 const Version = `v1.0`
@@ -20,6 +19,8 @@ __  ____/________  /_______ __________  /______________
 _  / __ _  __ \_  __ \  __  /_  ___/_  __ \  _ \_  ___/
 / /_/ / / /_/ /  / / / /_/ /_(__  )_  / / /  __/  /    
 \____/  \____//_/ /_/\__,_/ /____/ /_/ /_/\___//_/      
+
+             created by @emnaruto07 & @s0u1z
 `
 
 type Options struct {
@@ -29,19 +30,17 @@ type Options struct {
 	Version     bool
 }
 
-var wg sync.WaitGroup
-
 var md5, sha1, sha256, sha384, sha512 []func(param string, param2 string) string
 
 var result map[string]string
 
 func main() {
 
-	md5 = append(md5, Beta, Theta)
-	sha1 = append(sha1, Beta, Theta)
-	sha256 = append(sha256, Beta, Theta)
-	sha384 = append(sha384, Beta, Theta)
-	sha512 = append(sha512, Beta, Theta)
+	md5 = append(md5, Charlie, Bravo)
+	sha1 = append(sha1, Charlie, Bravo)
+	sha256 = append(sha256, Charlie, Bravo)
+	sha384 = append(sha384, Charlie, Bravo)
+	sha512 = append(sha512, Charlie, Bravo)
 
 	fmt.Println(banner)
 	options := ParseOptions()
@@ -107,7 +106,7 @@ func ParseOptions() *Options {
 	return options
 }
 
-func Beta(hashvalue string, hashtype string) string {
+func Charlie(hashvalue string, hashtype string) string {
 
 	resp, err := http.Get("https://hashtoolkit.com/decrypt-hash/?hash=" + hashvalue)
 	if err != nil {
@@ -134,7 +133,7 @@ func Beta(hashvalue string, hashtype string) string {
 	}
 }
 
-func Theta(hashvalue string, hashtype string) string {
+func Bravo(hashvalue string, hashtype string) string {
 
 	path := fmt.Sprintf("https://md5decrypt.net/Api/api.php?hash=%s&hash_type=%s&email=deanna_abshire@proxymail.eu&code=1152464b80a61728", hashvalue, hashtype)
 
@@ -232,12 +231,3 @@ func hashOnly(hashvalue string) {
 		println("Cracked hash of " + k + " value: " + decodedValue)
 	}
 }
-
-// for _, r := range res {
-// 	decodedValue, err := url.QueryUnescape(r)
-// 	if err != nil {
-// 		println(err)
-// 	}
-
-// 	println("Cracked hash of " + hashvalue + " value: " + decodedValue)
-// }
