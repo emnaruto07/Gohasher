@@ -186,6 +186,11 @@ func (c *GeneralCracker) md5Decrypt(hashvalue string) string {
 
 }
 
+type HashCracker interface {
+	String() string
+	Crack(hash string) (string, error)
+}
+
 func (c *GeneralCracker) String() string {
 	return c.hashType
 }
@@ -200,9 +205,4 @@ func (c *GeneralCracker) Crack(hash string) (string, error) {
 
 func NewGeneralCracker(hashType string) *GeneralCracker {
 	return &GeneralCracker{hashType}
-}
-
-type HashCracker interface {
-	String() string
-	Crack(hash string) (string, error)
 }
