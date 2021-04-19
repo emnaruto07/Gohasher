@@ -1,10 +1,12 @@
 package main
 
 import (
+	"bufio"
 	"flag"
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -48,16 +50,39 @@ var crackersByLength = map[int]HashCracker{
 	128: NewGeneralCracker("sha512"),
 }
 
+func ReadstdFile() []string {
+	var rows []string
+
+	scanner := bufio.NewScanner(os.Stdin)
+	for scanner.Scan() {
+		rows = append(rows, scanner.Text())
+		i := 0
+		for i < len(rows) {
+			rows[i] = strings.TrimSpace(rows[i])
+			if rows[i] == "" {
+				rows = append(rows[:i], rows[i+1:]...)
+			}
+			i++
+		}
+	}
+
+	if err := scanner.Err(); err != nil {
+		log.Println(err)
+	}
+
+	return rows
+}
+
 func main() {
 
 	fmt.Println(Teal(banner))
 	options := ParseOptions()
 
-	if options.Hash == "" && options.List == "" {
-		fmt.Println("HASH STRING OR HASH FILE MUST BE PROVIDED\t")
-		flag.Usage()
-		return
-	}
+	// if options.Hash == "" && options.List == "" {
+	// 	fmt.Println("HASH STRING OR HASH FILE MUST BE PROVIDED\t")
+	// 	flag.Usage()
+	// 	return
+	// }
 	if options.Hash != "" {
 
 		cracker, found := crackersByLength[len(options.Hash)]
@@ -93,6 +118,21 @@ func main() {
 
 		}
 
+	} else {
+		for _, r := range ReadstdFile() {
+			cracker, found := crackersByLength[len(r)]
+			if !found {
+				fmt.Println("unsupported hash")
+				return
+			}
+
+			fmt.Println("cracking hash type: " + cracker.String())
+			res, err := cracker.Crack(r)
+			if err != nil {
+				fmt.Println(err)
+			}
+			fmt.Println(res)
+		}
 	}
 }
 
