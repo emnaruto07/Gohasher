@@ -62,7 +62,7 @@ func main() {
 
 		cracker, found := crackersByLength[len(options.Hash)]
 		if !found {
-			fmt.Println("unsupported hash length")
+			fmt.Println("unsupported hash")
 			return
 		}
 		res, err := cracker.Crack(options.Hash)
@@ -80,7 +80,7 @@ func main() {
 		for _, f := range file {
 			cracker, found := crackersByLength[len(f)]
 			if !found {
-				fmt.Println("unsupported hash length")
+				fmt.Println("unsupported hash")
 				return
 			}
 
