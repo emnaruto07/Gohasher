@@ -40,17 +40,17 @@ type Options struct {
 	Version     bool
 }
 
-var md5, sha1, sha256, sha384, sha512 []func(param string, param2 string) string
-
 var result map[string]string
 
-func main() {
+var crackersByLength = map[int]HashCracker{
+	32:  NewGeneralCracker("md5"),
+	40:  NewGeneralCracker("sha1"),
+	64:  NewGeneralCracker("sha256"),
+	96:  NewGeneralCracker("sha384"),
+	128: NewGeneralCracker("sha512"),
+}
 
-	md5 = append(md5, Charlie, Bravo)
-	sha1 = append(sha1, Charlie, Bravo)
-	sha256 = append(sha256, Charlie, Bravo)
-	sha384 = append(sha384, Charlie, Bravo)
-	sha512 = append(sha512, Charlie, Bravo)
+func main() {
 
 	fmt.Println(Teal(banner))
 	options := ParseOptions()
@@ -60,20 +60,39 @@ func main() {
 		flag.Usage()
 		return
 	}
-
 	if options.Hash != "" {
 
-		hashOnly(options.Hash)
-
+		cracker, found := crackersByLength[len(options.Hash)]
+		if !found {
+			fmt.Println("unsupported hash length")
+			return
+		}
+		res, err := cracker.Crack(options.Hash)
+		if err != nil {
+			fmt.Println(err)
+		}
+		fmt.Println(res)
 	} else if options.List != "" {
 
 		file, err := ParseFile(options.List)
+
 		if err != nil {
-			panic(err)
+			fmt.Println(err)
 		}
 		for _, f := range file {
+			cracker, found := crackersByLength[len(f)]
+			if !found {
+				fmt.Println("unsupported hash length")
+				return
+			}
 
-			hashOnly(f)
+			fmt.Println("cracking hash type: " + cracker.String())
+			res, err := cracker.Crack(f)
+			if err != nil {
+				fmt.Println(err)
+			}
+			fmt.Println(res)
+
 		}
 
 	}
@@ -114,7 +133,11 @@ func ParseOptions() *Options {
 	return options
 }
 
-func Charlie(hashvalue string, hashtype string) string {
+type GeneralCracker struct {
+	hashType string
+}
+
+func (c *GeneralCracker) hashToolkit(hashvalue string) string {
 
 	resp, err := http.Get("https://hashtoolkit.com/decrypt-hash/?hash=" + hashvalue)
 	if err != nil {
@@ -133,17 +156,22 @@ func Charlie(hashvalue string, hashtype string) string {
 
 		res := strings.Split(r, "=")
 		ress := res[1]
+		decodedValue, err := url.QueryUnescape(ress[:len(ress)-1])
+		if err != nil {
+			fmt.Println(err)
+		}
 
-		return ress[:len(ress)-1]
+		return decodedValue
 
 	} else {
 		return r
 	}
+
 }
 
-func Bravo(hashvalue string, hashtype string) string {
-
-	path := fmt.Sprintf("https://md5decrypt.net/Api/api.php?hash=%s&hash_type=%s&email=deanna_abshire@proxymail.eu&code=1152464b80a61728", hashvalue, hashtype)
+func (c *GeneralCracker) md5Decrypt(hashvalue string) string {
+	// make md5crypt.net call, use c.hashType to get hash type
+	path := fmt.Sprintf("https://md5decrypt.net/Api/api.php?hash=%s&hash_type=%s&email=deanna_abshire@proxymail.eu&code=1152464b80a61728", hashvalue, c.hashType)
 
 	resp, err := http.Get(path)
 	if err != nil {
@@ -160,82 +188,23 @@ func Bravo(hashvalue string, hashtype string) string {
 
 }
 
-func hashCrack(hashvalue string) map[string]string {
-
-	result = make(map[string]string)
-	if len(hashvalue) == 32 {
-		fmt.Println("[!] Hash Function: MD5")
-		for _, api := range md5 {
-			r := api(hashvalue, "md5")
-			if r != "" {
-				result[hashvalue] = r
-			} else {
-				result[hashvalue] = "No hash found.\n"
-			}
-		}
-
-	} else if len(hashvalue) == 40 {
-		fmt.Println("[!] Hash Function: SHA1")
-		for _, api := range sha1 {
-			r := api(hashvalue, "sha1")
-			if r != "" {
-				result[hashvalue] = r
-			} else {
-				result[hashvalue] = "No hash found.\n"
-			}
-
-		}
-
-	} else if len(hashvalue) == 64 {
-		fmt.Println("[!] Hash Function: SHA-256")
-		for _, api := range sha256 {
-			r := api(hashvalue, "sha256")
-			if r != "" {
-				result[hashvalue] = r
-			} else {
-				result[hashvalue] = "No hash found.\n"
-			}
-		}
-
-	} else if len(hashvalue) == 96 {
-		fmt.Println("[!] Hash Function: SHA-384")
-		for _, api := range sha384 {
-			r := api(hashvalue, "sha384")
-			if r != "" {
-				result[hashvalue] = r
-			} else {
-				result[hashvalue] = "No hash found.\n"
-			}
-		}
-
-	} else if len(hashvalue) == 128 {
-		fmt.Println("[!] Hash Function: SHA-512")
-		for _, api := range sha512 {
-			r := api(hashvalue, "sha512")
-			if r != "" {
-				result[hashvalue] = r
-
-			} else {
-				result[hashvalue] = "No hash found.\n"
-			}
-		}
-
-	} else {
-		fmt.Println("[!!] This hash type is not supported")
-		os.Exit(0)
-	}
-
-	return result
+func (c *GeneralCracker) String() string {
+	return c.hashType
 }
 
-func hashOnly(hashvalue string) {
-
-	res := hashCrack(hashvalue)
-	for k, v := range res {
-		decodedValue, err := url.QueryUnescape(v)
-		if err != nil {
-			fmt.Println(err)
-		}
-		fmt.Println("Hash:" + k + " value: " + decodedValue)
+func (c *GeneralCracker) Crack(hash string) (string, error) {
+	result := c.hashToolkit(hash)
+	if result != "" {
+		return result, nil
 	}
+	return c.md5Decrypt(hash), nil
+}
+
+func NewGeneralCracker(hashType string) *GeneralCracker {
+	return &GeneralCracker{hashType}
+}
+
+type HashCracker interface {
+	String() string
+	Crack(hash string) (string, error)
 }
