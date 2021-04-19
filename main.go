@@ -40,8 +40,6 @@ type Options struct {
 	Version     bool
 }
 
-var result map[string]string
-
 var crackersByLength = map[int]HashCracker{
 	32:  NewGeneralCracker("md5"),
 	40:  NewGeneralCracker("sha1"),
