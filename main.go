@@ -99,7 +99,7 @@ func main() {
 func ParseFile(filename string) ([]string, error) {
 	d, err := ioutil.ReadFile(filename)
 	if err != nil {
-		panic(err)
+		fmt.Print("Error:", err)
 	}
 	rows := strings.Split(string(d), "\n")
 	i := 0
@@ -139,12 +139,12 @@ func (c *GeneralCracker) hashToolkit(hashvalue string) string {
 
 	resp, err := http.Get("https://hashtoolkit.com/decrypt-hash/?hash=" + hashvalue)
 	if err != nil {
-		panic(err)
+		fmt.Print("Error:", err)
 	}
 	defer resp.Body.Close()
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		panic(err)
+		fmt.Print("Error:", err)
 	}
 	re := regexp.MustCompile(`text=.*?"`)
 
@@ -173,13 +173,13 @@ func (c *GeneralCracker) md5Decrypt(hashvalue string) string {
 
 	resp, err := http.Get(path)
 	if err != nil {
-		panic(err)
+		fmt.Print("Error:", err)
 	}
 	defer resp.Body.Close()
 	body, err := io.ReadAll(resp.Body)
 
 	if err != nil {
-		panic(err)
+		fmt.Print("Error:", err)
 	}
 
 	return string(body)
