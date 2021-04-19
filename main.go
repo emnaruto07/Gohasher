@@ -12,6 +12,16 @@ import (
 	"strings"
 )
 
+var White = Color("\033[1;37m%s\033[0m")
+
+func Color(colorString string) func(...interface{}) string {
+	sprint := func(args ...interface{}) string {
+		return fmt.Sprintf(colorString,
+			fmt.Sprint(args...))
+	}
+	return sprint
+}
+
 const Version = `v1.0`
 
 const banner = `_________     ______               ______              
@@ -42,7 +52,7 @@ func main() {
 	sha384 = append(sha384, Charlie, Bravo)
 	sha512 = append(sha512, Charlie, Bravo)
 
-	fmt.Println(banner)
+	fmt.Println(White(banner))
 	options := ParseOptions()
 
 	if options.Hash == "" && options.List == "" {
@@ -67,10 +77,8 @@ func main() {
 		}
 
 	}
-
-	//
-
 }
+
 func ParseFile(filename string) ([]string, error) {
 	d, err := ioutil.ReadFile(filename)
 	if err != nil {
