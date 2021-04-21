@@ -36,10 +36,10 @@ _  / __ _  __ \_  __ \  __  /_  ___/_  __ \  _ \_  ___/
 `
 
 type Options struct {
-	Hash        string
-	List        string
-	Concurrency int
-	Version     bool
+	Hash string
+	List string
+	//Concurrency int
+	Version bool
 }
 
 var crackersByLength = map[int]HashCracker{
@@ -91,8 +91,9 @@ func main() {
 	*/
 	if fi.Mode()&os.ModeNamedPipe == 0 {
 		if options.Hash == "" && options.List == "" {
-			fmt.Print("HASH STRING OR HASH FILE MUST BE PROVIDED\n")
+			fmt.Print("[!!!]Hash string Or Hash file must be provided.\n")
 			flag.Usage()
+			os.Exit(1)
 			return
 		}
 
@@ -100,7 +101,7 @@ func main() {
 
 			cracker, found := crackersByLength[len(options.Hash)]
 			if !found {
-				fmt.Println("unsupported hash")
+				fmt.Println("[!!]Unsupported hash")
 				return
 			}
 			res, err := cracker.Crack(options.Hash)
@@ -186,7 +187,7 @@ func ParseOptions() *Options {
 
 	flag.StringVar(&options.Hash, "hash", "", "Provide the hash string with this flag.")
 	flag.StringVar(&options.List, "l", "", "Provide the file, Which contain the hashes.")
-	flag.IntVar(&options.Concurrency, "c", 10, "Number of concurrent goroutines for resolving")
+	//flag.IntVar(&options.Concurrency, "c", 10, "Number of concurrent goroutines for resolving")
 	flag.BoolVar(&options.Version, "version", false, "Show the version of GoHasher.")
 	flag.Parse()
 
