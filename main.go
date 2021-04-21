@@ -77,44 +77,72 @@ func main() {
 
 	fmt.Println(Teal(banner))
 	options := ParseOptions()
+	fi, err := os.Stdin.Stat()
+	if err != nil {
+		panic(err)
+	}
+	/*
+		    File.Mode() return a FileMode flag.
 
-	// if options.Hash == "" && options.List == "" {
-	// 	fmt.Println("HASH STRING OR HASH FILE MUST BE PROVIDED\t")
-	// 	flag.Usage()
-	// 	return
-	// }
-	if options.Hash != "" {
+		You can see what is each letter here FileMode.
+			The flag we are looking for is os.ModeNamedPipe. When this flag is on it means that we have a pipe.
+			This way we can know when our command is receiving stdout from another process.
 
-		cracker, found := crackersByLength[len(options.Hash)]
-		if !found {
-			fmt.Println("unsupported hash")
+	*/
+	if fi.Mode()&os.ModeNamedPipe == 0 {
+		if options.Hash == "" && options.List == "" {
+			fmt.Print("HASH STRING OR HASH FILE MUST BE PROVIDED\n")
+			flag.Usage()
 			return
 		}
-		res, err := cracker.Crack(options.Hash)
-		if err != nil {
-			fmt.Println(err)
-		}
-		fmt.Println(res)
-	} else if options.List != "" {
 
-		file, err := ParseFile(options.List)
+		if options.Hash != "" {
 
-		if err != nil {
-			fmt.Println(err)
-		}
-		for _, f := range file {
-			cracker, found := crackersByLength[len(f)]
+			cracker, found := crackersByLength[len(options.Hash)]
 			if !found {
 				fmt.Println("unsupported hash")
 				return
 			}
-
-			fmt.Println("cracking hash type: " + cracker.String())
-			res, err := cracker.Crack(f)
+			res, err := cracker.Crack(options.Hash)
 			if err != nil {
 				fmt.Println(err)
 			}
-			fmt.Println(res)
+			if res != "" {
+				fmt.Println("Hash: " + options.Hash + " value: " + res)
+				fmt.Println("")
+			} else {
+				fmt.Println("Hash: " + options.Hash + " value: Not found")
+				fmt.Println("")
+			}
+		} else if options.List != "" {
+
+			file, err := ParseFile(options.List)
+
+			if err != nil {
+				fmt.Println(err)
+			}
+			for _, f := range file {
+				cracker, found := crackersByLength[len(f)]
+				if !found {
+					fmt.Println("unsupported hash")
+					return
+				}
+
+				fmt.Println("cracking hash type: " + cracker.String())
+				fmt.Println("")
+				res, err := cracker.Crack(f)
+				if err != nil {
+					fmt.Println(err)
+				}
+				if res != "" {
+					fmt.Println("Hash: " + f + " value: " + res)
+					fmt.Println("")
+				} else {
+					fmt.Println("Hash: " + f + " value:  Not found")
+					fmt.Println("")
+				}
+
+			}
 
 		}
 
@@ -131,9 +159,17 @@ func main() {
 			if err != nil {
 				fmt.Println(err)
 			}
-			fmt.Println(res)
+			if res != "" {
+				fmt.Println("Hash: " + r + " value: " + res)
+				fmt.Println("")
+			} else {
+				fmt.Println("Hash: " + r + " value:  Not found")
+				fmt.Println("")
+			}
 		}
+
 	}
+
 }
 
 func ParseFile(filename string) ([]string, error) {
@@ -236,11 +272,12 @@ func (c *GeneralCracker) String() string {
 }
 
 func (c *GeneralCracker) Crack(hash string) (string, error) {
-	result := c.hashToolkit(hash)
+	result := c.md5Decrypt(hash)
 	if result != "" {
 		return result, nil
 	}
 	return c.md5Decrypt(hash), nil
+
 }
 
 func NewGeneralCracker(hashType string) *GeneralCracker {
