@@ -108,11 +108,9 @@ func main() {
 				fmt.Println(err)
 			}
 			if res != "" {
-				fmt.Println("Hash: " + options.Hash + " value: " + res)
-				fmt.Println("")
+				fmt.Printf("Hash(%v): %v value: %v", cracker.String(), options.Hash, res)
 			} else {
-				fmt.Println("Hash: " + options.Hash + " value: Not found")
-				fmt.Println("")
+				fmt.Printf("Hash(%v): %v value: Not found\n", cracker.String(), options.Hash)
 			}
 		} else if options.List != "" {
 
@@ -124,22 +122,19 @@ func main() {
 			for _, f := range file {
 				cracker, found := crackersByLength[len(f)]
 				if !found {
-					fmt.Println("unsupported hash")
+					fmt.Println("[!!]Usupported hash")
 					return
 				}
 
-				fmt.Println("cracking hash type: " + cracker.String())
-				fmt.Println("")
 				res, err := cracker.Crack(f)
 				if err != nil {
 					fmt.Println(err)
 				}
 				if res != "" {
-					fmt.Println("Hash: " + f + " value: " + res)
-					fmt.Println("")
+					//fmt.Println("Hash(%v):" + %v + " value:" + %v) // Hash(Md5):hash value:value
+					fmt.Printf("Hash(%v): %v value: %v", cracker.String(), f, res)
 				} else {
-					fmt.Println("Hash: " + f + " value:  Not found")
-					fmt.Println("")
+					fmt.Printf("Hash(%v): %v value: Not found\n", cracker.String(), f)
 				}
 
 			}
@@ -150,21 +145,17 @@ func main() {
 		for _, r := range ReadstdFile() {
 			cracker, found := crackersByLength[len(r)]
 			if !found {
-				fmt.Println("unsupported hash")
+				fmt.Println("[!!]Unsupported hash")
 				return
 			}
-
-			fmt.Println("cracking hash type: " + cracker.String())
 			res, err := cracker.Crack(r)
 			if err != nil {
 				fmt.Println(err)
 			}
 			if res != "" {
-				fmt.Println("Hash: " + r + " value: " + res)
-				fmt.Println("")
+				fmt.Printf("Hash(%v): %v value: %v", cracker.String(), r, res)
 			} else {
-				fmt.Println("Hash: " + r + " value:  Not found")
-				fmt.Println("")
+				fmt.Printf("Hash(%v): %v value: Not found\n", cracker.String(), r)
 			}
 		}
 
