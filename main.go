@@ -13,6 +13,7 @@ import (
 	"regexp"
 	"strings"
 	"time"
+	"sync"
 )
 
 var Teal = Color("\033[1;36m%s\033[0m")
@@ -118,30 +119,17 @@ func main() {
 			}
 		} else if options.List != "" {
 
-			file, err := ParseFile(options.List)
-
+			hp, err := MakePipe(options.List)
 			if err != nil {
 				fmt.Println(err)
+				return
 			}
-			for _, f := range file {
-				cracker, found := crackersByLength[len(f)]
-				if !found {
-					fmt.Println("[!!]Usupported hash")
-					return
-				}
-
-				res, err := cracker.Crack(f)
-				if err != nil {
-					fmt.Println(err)
-				}
-				if res != "" {
-					//fmt.Println("Hash(%v):" + %v + " value:" + %v) // Hash(Md5):hash value:value
-					fmt.Printf("Hash(%v): %v value: %v\n", cracker.String(), f, res)
-				} else {
-					fmt.Printf("Hash(%v): %v value: Not found\n", cracker.String(), f)
-				}
-
+			wg := new(sync.WaitGroup)
+			wg.Add(10)
+			for i := 0; i < 10; i++ {
+				go worker(hp, wg)
 			}
+			wg.Wait()
 
 		}
 
@@ -174,6 +162,48 @@ func main() {
 	elapsed := time.Since(start)
 	fmt.Printf("Gohasher took %s", elapsed)
 
+}
+
+func MakePipe(fname string) (hashPipe <-chan string, err error) {
+	in, err := os.Open(fname)
+	if err != nil {
+		return
+	}
+
+	hp := make(chan string, 10) // Todo: re-add the -c flag
+	hashPipe = hp
+	go func(input io.ReadCloser, hp chan<- string) {
+		defer input.Close()
+		s := bufio.NewScanner(input)
+		for s.Scan() {
+			hp <- s.Text()
+		}
+		close(hp)
+	}(in, hp)
+
+	return
+}
+
+func worker(in <-chan string, wg *sync.WaitGroup) {
+	defer wg.Done()
+	for it := range in {
+		cracker, found := crackersByLength[len(it)]
+		if !found {
+			fmt.Println("[!!]Unsupported hash", it)
+			continue
+		}
+
+		res, err := cracker.Crack(it)
+
+		if err != nil {
+			fmt.Println(err)
+		}
+		if res != "" {
+			fmt.Printf("Hash(%v): %v value: %v\n", cracker.String(), it, res)
+		} else {
+			fmt.Printf("Hash(%v): %v value: Not found\n", cracker.String(), it)
+		}
+	}
 }
 
 func ParseFile(filename string) ([]string, error) {
