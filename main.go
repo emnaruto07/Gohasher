@@ -36,10 +36,10 @@ _  / __ _  __ \_  __ \  __  /_  ___/_  __ \  _ \_  ___/
 `
 
 type Options struct {
-	Hash string
-	List string
-	//Concurrency int
-	Version bool
+	Hash        string
+	List        string
+	Concurrency int
+	Version     bool
 }
 
 var crackersByLength = map[int]HashCracker{
@@ -53,9 +53,9 @@ var crackersByLength = map[int]HashCracker{
 func main() {
 
 	start := time.Now()
-
 	fmt.Println(Teal(banner))
 	options := ParseOptions()
+	threads := options.Concurrency / 2
 	fi, err := os.Stdin.Stat()
 	if err != nil {
 		panic(err)
@@ -88,20 +88,20 @@ func main() {
 				fmt.Println(err)
 			}
 			if res != "" {
-				fmt.Printf("Hash(%v): %v value: %v\n", cracker.String(), options.Hash, res)
+				fmt.Printf("Hash(%v): %v value: %v", cracker.String(), options.Hash, res)
 			} else {
 				fmt.Printf("Hash(%v): %v value: Not found\n", cracker.String(), options.Hash)
 			}
 		} else if options.List != "" {
 
-			hp, err := MakePipe(options.List)
+			hp, err := MakePipe(options.List, threads)
 			if err != nil {
 				fmt.Println(err)
 				return
 			}
 			wg := new(sync.WaitGroup)
-			wg.Add(10)
-			for i := 0; i < 10; i++ {
+			wg.Add(threads)
+			for i := 0; i < threads; i++ {
 				go worker(hp, wg)
 			}
 			wg.Wait()
@@ -110,14 +110,14 @@ func main() {
 
 	} else {
 
-		hp, err := MakePipeFile()
+		hp, err := MakePipeFile(threads)
 		if err != nil {
 			fmt.Println(err)
 			return
 		}
 		wg := new(sync.WaitGroup)
-		wg.Add(10)
-		for i := 0; i < 10; i++ {
+		wg.Add(threads)
+		for i := 0; i < threads; i++ {
 			go worker(hp, wg)
 		}
 		wg.Wait()
@@ -128,13 +128,13 @@ func main() {
 
 }
 
-func MakePipe(fname string) (hashPipe <-chan string, err error) {
+func MakePipe(fname string, con int) (hashPipe <-chan string, err error) {
 	in, err := os.Open(fname)
 	if err != nil {
 		return
 	}
-
-	hp := make(chan string, 10) // Todo: re-add the -c flag
+	thr := con
+	hp := make(chan string, thr) // Todo: re-add the -c flag
 	hashPipe = hp
 	go func(input io.ReadCloser, hp chan<- string) {
 		defer input.Close()
@@ -169,9 +169,9 @@ func worker(in <-chan string, wg *sync.WaitGroup) {
 		}
 	}
 }
-func MakePipeFile() (hashPipe <-chan string, err error) {
-
-	hp := make(chan string, 10) // Todo: re-add the -c flag
+func MakePipeFile(con int) (hashPipe <-chan string, err error) {
+	thr := con
+	hp := make(chan string, thr) // Todo: re-add the -c flag
 	hashPipe = hp
 	go func(hp chan<- string) {
 
@@ -190,7 +190,7 @@ func ParseOptions() *Options {
 
 	flag.StringVar(&options.Hash, "hash", "", "Provide the hash string with this flag.")
 	flag.StringVar(&options.List, "l", "", "Provide the file, Which contain the hashes.")
-	//flag.IntVar(&options.Concurrency, "c", 10, "Number of concurrent goroutines for resolving")
+	flag.IntVar(&options.Concurrency, "c", 10, "Number of concurrent goroutines for resolving")
 	flag.BoolVar(&options.Version, "version", false, "Show the version of GoHasher.")
 	flag.Parse()
 
@@ -291,7 +291,6 @@ func (c *GeneralCracker) Crack(hash string) (string, error) {
 	var result3 = make(chan string)
 
 	go func() {
-
 		if c.hashType == "md5" {
 			result1 <- c.nitrxGen(hash)
 		} else if c.hashType == "sha1" {
