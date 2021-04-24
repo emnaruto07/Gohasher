@@ -11,9 +11,12 @@ import (
 	"net/url"
 	"os"
 	"regexp"
+	"runtime"
 	"strings"
+	"sync"
 )
 
+var wg sync.WaitGroup
 var Teal = Color("\033[1;36m%s\033[0m")
 
 func Color(colorString string) func(...interface{}) string {
@@ -154,7 +157,7 @@ func main() {
 				fmt.Println(err)
 			}
 			if res != "" {
-				fmt.Printf("Hash(%v): %v value: %v", cracker.String(), r, res)
+				fmt.Printf("Hash(%v): %v value: %v\n", cracker.String(), r, res)
 			} else {
 				fmt.Printf("Hash(%v): %v value: Not found\n", cracker.String(), r)
 			}
@@ -218,6 +221,7 @@ func (c *GeneralCracker) hashToolkit(hashvalue string) string {
 
 	s := re.Find(body)
 	r := string(s)
+
 	if r != "" {
 
 		res := strings.Split(r, "=")
@@ -264,11 +268,24 @@ func (c *GeneralCracker) String() string {
 }
 
 func (c *GeneralCracker) Crack(hash string) (string, error) {
-	result := c.md5Decrypt(hash)
-	if result != "" {
-		return result, nil
-	}
-	return c.md5Decrypt(hash), nil
+	runtime.GOMAXPROCS(2)
+
+	wg.Add(2)
+
+	var result string
+	go func() {
+		defer wg.Done()
+		result = c.hashToolkit(hash)
+
+	}()
+	go func() {
+		defer wg.Done()
+		result = c.md5Decrypt(hash)
+
+	}()
+
+	wg.Wait()
+	return result, nil
 
 }
 
