@@ -295,22 +295,30 @@ func (c *GeneralCracker) String() string {
 }
 
 func (c *GeneralCracker) Crack(hash string) (string, error) {
-	var result = make(chan string)
+	var result1 = make(chan string)
+	var result2 = make(chan string)
+	var result3 = make(chan string)
 
 	go func() {
 
 		if c.hashType == "md5" {
-			result <- c.nitrxGen(hash)
+			result1 <- c.nitrxGen(hash)
 		} else if c.hashType == "sha1" {
-			result <- c.hashToolkit(hash)
+			result2 <- c.hashToolkit(hash)
 		} else {
-			result <- c.md5Decrypt(hash)
+			result3 <- c.md5Decrypt(hash)
 		}
 
 	}()
 
-	return <-result, nil
-
+	select {
+	case v1 := <-result1:
+		return v1, nil
+	case v2 := <-result2:
+		return v2, nil
+	case v3 := <-result3:
+		return v3, nil
+	}
 }
 
 func NewGeneralCracker(hashType string) *GeneralCracker {
