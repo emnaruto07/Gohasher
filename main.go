@@ -11,12 +11,10 @@ import (
 	"net/url"
 	"os"
 	"regexp"
-	"runtime"
 	"strings"
-	"sync"
+	"time"
 )
 
-var wg sync.WaitGroup
 var Teal = Color("\033[1;36m%s\033[0m")
 
 func Color(colorString string) func(...interface{}) string {
@@ -77,6 +75,8 @@ func ReadstdFile() []string {
 }
 
 func main() {
+
+	start := time.Now()
 
 	fmt.Println(Teal(banner))
 	options := ParseOptions()
@@ -147,12 +147,17 @@ func main() {
 
 	} else {
 		for _, r := range ReadstdFile() {
+
+			var res string
+			var err error
 			cracker, found := crackersByLength[len(r)]
 			if !found {
 				fmt.Println("[!!]Unsupported hash")
 				return
 			}
-			res, err := cracker.Crack(r)
+
+			res, err = cracker.Crack(r)
+
 			if err != nil {
 				fmt.Println(err)
 			}
@@ -161,9 +166,13 @@ func main() {
 			} else {
 				fmt.Printf("Hash(%v): %v value: Not found\n", cracker.String(), r)
 			}
+
 		}
 
 	}
+
+	elapsed := time.Since(start)
+	log.Printf("Binomial took %s", elapsed)
 
 }
 
@@ -258,6 +267,24 @@ func (c *GeneralCracker) md5Decrypt(hashvalue string) string {
 
 }
 
+func (c *GeneralCracker) nitrxGen(hashvalue string) string {
+	// make md5crypt.net call, use c.hashType to get hash type
+
+	resp, err := http.Get("http://www.nitrxgen.net/md5db/" + hashvalue)
+	if err != nil {
+		fmt.Print("Error:", err)
+	}
+	defer resp.Body.Close()
+	body, err := io.ReadAll(resp.Body)
+
+	if err != nil {
+		fmt.Print("Error:", err)
+	}
+
+	return string(body)
+
+}
+
 type HashCracker interface {
 	String() string
 	Crack(hash string) (string, error)
@@ -268,24 +295,21 @@ func (c *GeneralCracker) String() string {
 }
 
 func (c *GeneralCracker) Crack(hash string) (string, error) {
-	runtime.GOMAXPROCS(2)
+	var result = make(chan string)
 
-	wg.Add(2)
-
-	var result string
 	go func() {
-		defer wg.Done()
-		result = c.hashToolkit(hash)
 
-	}()
-	go func() {
-		defer wg.Done()
-		result = c.md5Decrypt(hash)
+		if c.hashType == "md5" {
+			result <- c.nitrxGen(hash)
+		} else if c.hashType == "sha1" {
+			result <- c.hashToolkit(hash)
+		} else {
+			result <- c.md5Decrypt(hash)
+		}
 
 	}()
 
-	wg.Wait()
-	return result, nil
+	return <-result, nil
 
 }
 
