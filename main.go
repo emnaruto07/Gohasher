@@ -112,7 +112,7 @@ func main() {
 				fmt.Println(err)
 			}
 			if res != "" {
-				fmt.Printf("Hash(%v): %v value: %v", cracker.String(), options.Hash, res)
+				fmt.Printf("Hash(%v): %v value: %v\n", cracker.String(), options.Hash, res)
 			} else {
 				fmt.Printf("Hash(%v): %v value: Not found\n", cracker.String(), options.Hash)
 			}
@@ -136,7 +136,7 @@ func main() {
 				}
 				if res != "" {
 					//fmt.Println("Hash(%v):" + %v + " value:" + %v) // Hash(Md5):hash value:value
-					fmt.Printf("Hash(%v): %v value: %v", cracker.String(), f, res)
+					fmt.Printf("Hash(%v): %v value: %v\n", cracker.String(), f, res)
 				} else {
 					fmt.Printf("Hash(%v): %v value: Not found\n", cracker.String(), f)
 				}
@@ -172,7 +172,7 @@ func main() {
 	}
 
 	elapsed := time.Since(start)
-	log.Printf("Binomial took %s", elapsed)
+	fmt.Printf("Gohasher took %s", elapsed)
 
 }
 
