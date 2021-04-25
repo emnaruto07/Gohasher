@@ -5,15 +5,13 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"io/ioutil"
-	"log"
 	"net/http"
 	"net/url"
 	"os"
 	"regexp"
 	"strings"
-	"time"
 	"sync"
+	"time"
 )
 
 var Teal = Color("\033[1;36m%s\033[0m")
@@ -50,29 +48,6 @@ var crackersByLength = map[int]HashCracker{
 	64:  NewGeneralCracker("sha256"),
 	96:  NewGeneralCracker("sha384"),
 	128: NewGeneralCracker("sha512"),
-}
-
-func ReadstdFile() []string {
-	var rows []string
-
-	scanner := bufio.NewScanner(os.Stdin)
-	for scanner.Scan() {
-		rows = append(rows, scanner.Text())
-		i := 0
-		for i < len(rows) {
-			rows[i] = strings.TrimSpace(rows[i])
-			if rows[i] == "" {
-				rows = append(rows[:i], rows[i+1:]...)
-			}
-			i++
-		}
-	}
-
-	if err := scanner.Err(); err != nil {
-		log.Println(err)
-	}
-
-	return rows
 }
 
 func main() {
@@ -134,29 +109,18 @@ func main() {
 		}
 
 	} else {
-		for _, r := range ReadstdFile() {
 
-			var res string
-			var err error
-			cracker, found := crackersByLength[len(r)]
-			if !found {
-				fmt.Println("[!!]Unsupported hash")
-				return
-			}
-
-			res, err = cracker.Crack(r)
-
-			if err != nil {
-				fmt.Println(err)
-			}
-			if res != "" {
-				fmt.Printf("Hash(%v): %v value: %v\n", cracker.String(), r, res)
-			} else {
-				fmt.Printf("Hash(%v): %v value: Not found\n", cracker.String(), r)
-			}
-
+		hp, err := MakePipeFile()
+		if err != nil {
+			fmt.Println(err)
+			return
 		}
-
+		wg := new(sync.WaitGroup)
+		wg.Add(10)
+		for i := 0; i < 10; i++ {
+			go worker(hp, wg)
+		}
+		wg.Wait()
 	}
 
 	elapsed := time.Since(start)
@@ -205,23 +169,20 @@ func worker(in <-chan string, wg *sync.WaitGroup) {
 		}
 	}
 }
+func MakePipeFile() (hashPipe <-chan string, err error) {
 
-func ParseFile(filename string) ([]string, error) {
-	d, err := ioutil.ReadFile(filename)
-	if err != nil {
-		fmt.Print("Error:", err)
-	}
-	rows := strings.Split(string(d), "\n")
-	i := 0
-	for i < len(rows) {
-		rows[i] = strings.TrimSpace(rows[i])
-		if rows[i] == "" {
-			rows = append(rows[:i], rows[i+1:]...)
+	hp := make(chan string, 10) // Todo: re-add the -c flag
+	hashPipe = hp
+	go func(hp chan<- string) {
+
+		s := bufio.NewScanner(os.Stdin)
+		for s.Scan() {
+			hp <- s.Text()
 		}
-		i++
-	}
-	return rows, nil
+		close(hp)
+	}(hp)
 
+	return
 }
 
 func ParseOptions() *Options {
