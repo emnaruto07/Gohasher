@@ -34,6 +34,9 @@ Usage of ./Gohasher:
 
 ```
 # License
+See **[License](https://github.com/emnaruto07/Gohasher/blob/main/LICENSE)**
+
+# Creators
 Gohasher is made with :heart:&nbsp; in India :india: by [@emnaruto07](https://twitter.com/emnaruto07) & [@s0u1z](https://twitter.com/Shreyasbhat4).
 
 # Credits
