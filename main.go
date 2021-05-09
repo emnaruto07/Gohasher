@@ -124,7 +124,7 @@ func main() {
 	}
 
 	elapsed := time.Since(start)
-	fmt.Printf("Gohasher took %s", elapsed)
+	fmt.Printf("Gohasher took %s\n", elapsed)
 
 }
 
@@ -291,11 +291,12 @@ func (c *GeneralCracker) Crack(hash string) (string, error) {
 	var result3 = make(chan string)
 
 	go func() {
-		if c.hashType == "md5" {
+		switch {
+		case c.hashType == "md5":
 			result1 <- c.nitrxGen(hash)
-		} else if c.hashType == "sha1" {
+		case c.hashType == "sha1":
 			result2 <- c.hashToolkit(hash)
-		} else {
+		default:
 			result3 <- c.md5Decrypt(hash)
 		}
 
